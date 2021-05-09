@@ -1,61 +1,68 @@
 import os
 import csv
 
+election_data_csv = os.path.join("Resources","election_data.cvs")
 
-# Variables
-months = []
-p = []
-average_net_change = 0
-total_months = 0
-net_change = []
+total_votes = 0 
+candidate_list = []
+candidate_dict = {}
 
-# Load csv file
-csvpath = os.path.join('Resources', 'budget_data.csv')
+winning_vote = 0 
+winner = ""
 
 with open(csvpath, newline="") as csvfile:
-    csvreader = csv.reader(csvfile, delimiter=",")
-    reader = csv.reader(csvfile)
-    next(reader, None)
-# Add values to lists
-    for row in reader:
-        month = row[0]
-        months.append(month)
-        values = int(row[1])
-        p.append(values)
 
-total_months = len(months)
-net_total = sum(p)
-net_total_months = len(months) - 1
-difference_budget_data = []
+        csvreader = csv.reader(csvfile, delimiter=",")
+        reader = csv.reader(csvfile)
+        next(reader, None)
 
-for i in range(len(p) - 1):
-    difference_budget_data.append(float(p[i + 1]) - float(p[i]))
-    new_net_total = sum(difference_budget_data)
+        for row in reader:
+            # start counting total votes    
+            total_votes += 1 
+        
+            # get the reference to the candidate name from the row 
+            candidate = row[2]
 
-# Find the sum of profits/losses
-average_net_change = new_net_total/net_total_months
+            # begin the if statement 
+            if candidate not in candidate_list:
+            # add the candidate to the list_candidate 
+                candidate_list.append(candidate)
+                candidate_dict[candidate] = 0
 
-# Find the greatest increase/decrease (date and amount) over the entire period
-min_p = p[p.index(min(p))] - p[p.index(min(p))-1]
-max_p = p[p.index(max(p))] - p[p.index(max(p))-1]
+            
+            candidate_dict[candidate] +=1 
 
-# Print out results to console
-print("Financial Analysis")
-print("--------------------")
-print(f"Total Months: {total_months}")
-print(f"Total: ${net_total}")
-print(f"Average Change: ${round(average_net_change,2)}")
-print(f'Greatest Increase in Profits: {months[p.index(max(p))]} (${max_p})')
-print(f"Greatest Descrease in Profits: {months[p.index(min(p))]} (${min_p})")
-
-# Create a text file with the results
-output_file = 'Analysis/financial_analysis.txt'
+output_file = 'Analysis/election_results.txt'
 with open(output_file, "w", newline="") as datafile:
-    csvwriter = csv.writer(datafile)
-    csvwriter.writerow(["Financial Analysis"])
-    csvwriter.writerow(["--------------------"])
-    csvwriter.writerow([f"Total Months: {total_months}"])
-    csvwriter.writerow([f"Total: ${net_total}"])
-    csvwriter.writerow([f"Average Change: ${round(average_net_change,2)}"])
-    csvwriter.writerow([f'Greatest Increase in Profits: {months[p.index(max(p))]} (${max_p})'])
-    csvwriter.writerow([f"Greatest Decrease in Profits: {months[p.index(min(p))]} (${min_p})"])
+    
+    # print the total votes 
+    print(f"Election Results")
+    print(f"--------------------")
+    print(f"Total Votes: {total_votes}")
+    print(f"--------------------")
+
+    datafile.write(f"Election Results\n")
+    datafile.write(f"--------------------\n")
+    datafile.write(f"Total Votes: {total_votes}\n")
+    datafile.write(f"--------------------\n")
+    
+    # loop through the candidates and calculate their percentage of the votes 
+    for candidate in candidate_dict: 
+        percentage = round(float(candidate_dict[candidate])/float(total_votes),2)
+
+        print(f"{candidate}: {percentage:.3%} ({candidate_dict[candidate]})\n")
+        datafile.write(f"{candidate}: {percentage:.3%} ({candidate_dict[candidate]})\n")
+
+        votes = candidate_dict[candidate]
+        if votes > winning_vote:
+            winning_vote = votes
+            winner = candidate
+
+    # print to terminal and the txt file       
+    print(f"--------------------")
+    print(f"Winner: {winner}")
+    print(f"--------------------")
+    datafile.write(f"--------------------\n")
+    datafile.write(f"Winner: {winner}\n")
+    datafile.write(f"--------------------")
+
